@@ -19,6 +19,17 @@ function getFileExt(filePath) {
   return match ? match[1].toLowerCase() : ''
 }
 
+function getDrawingSlug(subPath) {
+  const parts = subPath.split('/').filter(Boolean)
+  if (parts.length >= 3 && ['glb', 'pdf'].includes(parts[0].toLowerCase())) {
+    return parts[1]
+  }
+  if (parts.length >= 2) {
+    return parts[parts.length - 2]
+  }
+  return getFileStem(subPath)
+}
+
 function ensureEntry(index, clientSlug, jobSlug, drawingSlug) {
   if (!index.has(clientSlug)) {
     index.set(clientSlug, new Map())
@@ -61,7 +72,7 @@ function collectAssets() {
     const clientSlug = decodeURIComponent(match[1])
     const jobSlug = decodeURIComponent(match[2])
     const subPath = match[3]
-    const drawingSlug = titleFromSlug(getFileStem(subPath)).replace(/\s+/g, '-').toLowerCase()
+    const drawingSlug = getDrawingSlug(subPath)
     const entry = ensureEntry(hierarchy, clientSlug, jobSlug, drawingSlug)
 
     const resolvedUrl = typeof assetUrl === 'string' ? assetUrl : withBasePath(assetPath)

@@ -7,23 +7,13 @@ function titleFromFolderName(folderName) {
     .join(' ')
 }
 
+function getFileExt(filePath) {
+  const match = filePath.match(/\.([^.]+)$/)
+  return match ? match[1].toLowerCase() : ''
+}
+
 export function loadProjectFolderStatuses() {
-  const modelFileMap = import.meta.glob('/projects/*/glb/*.{glb,gltf,GLB,GLTF}', {
-    eager: true,
-    import: 'default',
-    query: '?url',
-  })
-  const drawingFileMap = import.meta.glob('/projects/*/pdf/*.{pdf,PDF}', {
-    eager: true,
-    import: 'default',
-    query: '?url',
-  })
-  const previewFileMap = import.meta.glob('/projects/*/glb/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
-    eager: true,
-    import: 'default',
-    query: '?url',
-  })
-  const pdfPreviewFileMap = import.meta.glob('/projects/*/pdf/*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
+  const assetFileMap = import.meta.glob('/projects/*/*/**/*.{glb,gltf,GLB,GLTF,pdf,PDF,png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
     eager: true,
     import: 'default',
     query: '?url',
@@ -31,44 +21,34 @@ export function loadProjectFolderStatuses() {
 
   const folders = new Map()
 
-  for (const [assetPath, assetUrl] of Object.entries(modelFileMap)) {
-    const match = assetPath.match(/^\/projects\/([^/]+)\/glb\//)
+  for (const [assetPath, assetUrl] of Object.entries(assetFileMap)) {
+    const match = assetPath.match(/^\/projects\/([^/]+)\/([^/]+)\/(.+)$/)
     if (!match) continue
 
-    const folder = decodeURIComponent(match[1])
-    const row = folders.get(folder) || { folder, modelFiles: [], drawingFiles: [], previewFiles: [], pdfPreviewFiles: [] }
-    row.modelFiles.push(typeof assetUrl === 'string' ? assetUrl : assetPath)
-    folders.set(folder, row)
-  }
+    const clientSlug = decodeURIComponent(match[1])
+    const jobSlug = decodeURIComponent(match[2])
+    const folderKey = `${clientSlug}/${jobSlug}`
+    const row = folders.get(folderKey) || {
+      clientSlug,
+      jobSlug,
+      folder: folderKey,
+      modelFiles: [],
+      drawingFiles: [],
+      previewFiles: [],
+    }
 
-  for (const [assetPath, assetUrl] of Object.entries(drawingFileMap)) {
-    const match = assetPath.match(/^\/projects\/([^/]+)\/pdf\//)
-    if (!match) continue
+    const resolvedUrl = typeof assetUrl === 'string' ? assetUrl : assetPath
+    const ext = getFileExt(assetPath)
 
-    const folder = decodeURIComponent(match[1])
-    const row = folders.get(folder) || { folder, modelFiles: [], drawingFiles: [], previewFiles: [], pdfPreviewFiles: [] }
-    row.drawingFiles.push(typeof assetUrl === 'string' ? assetUrl : assetPath)
-    folders.set(folder, row)
-  }
+    if (ext === 'glb' || ext === 'gltf') {
+      row.modelFiles.push(resolvedUrl)
+    } else if (ext === 'pdf') {
+      row.drawingFiles.push(resolvedUrl)
+    } else if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+      row.previewFiles.push(resolvedUrl)
+    }
 
-  for (const [assetPath, assetUrl] of Object.entries(previewFileMap)) {
-    const match = assetPath.match(/^\/projects\/([^/]+)\/glb\//)
-    if (!match) continue
-
-    const folder = decodeURIComponent(match[1])
-    const row = folders.get(folder) || { folder, modelFiles: [], drawingFiles: [], previewFiles: [], pdfPreviewFiles: [] }
-    row.previewFiles.push(typeof assetUrl === 'string' ? assetUrl : assetPath)
-    folders.set(folder, row)
-  }
-
-  for (const [assetPath, assetUrl] of Object.entries(pdfPreviewFileMap)) {
-    const match = assetPath.match(/^\/projects\/([^/]+)\/pdf\//)
-    if (!match) continue
-
-    const folder = decodeURIComponent(match[1])
-    const row = folders.get(folder) || { folder, modelFiles: [], drawingFiles: [], previewFiles: [], pdfPreviewFiles: [] }
-    row.pdfPreviewFiles.push(typeof assetUrl === 'string' ? assetUrl : assetPath)
-    folders.set(folder, row)
+    folders.set(folderKey, row)
   }
 
   return Array.from(folders.values())
@@ -76,25 +56,29 @@ export function loadProjectFolderStatuses() {
       const modelFiles = row.modelFiles.sort()
       const drawingFiles = row.drawingFiles.sort()
       const previewFiles = row.previewFiles.sort()
-      const pdfPreviewFiles = row.pdfPreviewFiles.sort()
       const modelPreviewImage = previewFiles.find((file) => /\/model\.(png|jpg|jpeg|webp)$/i.test(file)) || previewFiles[0] || ''
-      const pdfPreviewImage = pdfPreviewFiles.find((file) => /\/(drawing|pdf|cover|preview)\.(png|jpg|jpeg|webp)$/i.test(file)) || pdfPreviewFiles[0] || ''
-      const previewImage = modelPreviewImage || pdfPreviewImage
+      const previewImage = modelPreviewImage
 
       return {
-        projectName: titleFromFolderName(row.folder),
+        projectName: titleFromFolderName(row.jobSlug),
         projectFolder: row.folder,
+        clientSlug: row.clientSlug,
+        clientName: titleFromFolderName(row.clientSlug),
+        jobSlug: row.jobSlug,
+        jobName: titleFromFolderName(row.jobSlug),
         modelFiles,
         drawingFiles,
         previewFiles,
-        pdfPreviewFiles,
         modelPreviewImage,
-        pdfPreviewImage,
         previewImage,
         hasModel: modelFiles.length > 0,
         hasPdf: drawingFiles.length > 0,
         hasPreview: Boolean(previewImage),
       }
     })
-    .sort((a, b) => a.projectName.localeCompare(b.projectName))
+    .sort((a, b) => {
+      const clientCompare = a.clientName.localeCompare(b.clientName)
+      if (clientCompare !== 0) return clientCompare
+      return a.projectName.localeCompare(b.projectName)
+    })
 }

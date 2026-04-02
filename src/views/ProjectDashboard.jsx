@@ -164,7 +164,7 @@ export function ProjectDashboard() {
   const filteredFolderStatuses = folderStatuses
     .filter((entry) => {
       if (!normalizedSearchTerm) return true
-      const searchableText = `${entry.projectName} ${entry.projectFolder}`.toLowerCase()
+      const searchableText = `${entry.projectName} ${entry.clientName || ''} ${entry.projectFolder}`.toLowerCase()
       return searchableText.includes(normalizedSearchTerm)
     })
     .sort((left, right) => {
@@ -247,7 +247,7 @@ export function ProjectDashboard() {
       .filter((client) => client.jobs.length > 0)
   }, [apiOverrides, labelOverrides, normalizedSearchTerm])
   const headerTitle = status === 'catalog' ? 'lscfitouts' : undefined
-  const headerSubtitle = status === 'catalog' ? 'All project folders in ./projects' : undefined
+  const headerSubtitle = status === 'catalog' ? 'All jobs discovered under ./projects/<client>/<job>' : undefined
   const headerStatus = status === 'catalog' ? `${folderStatuses.length} Projects` : undefined
   const catalogStats = {
     total: folderStatuses.length,
@@ -442,7 +442,7 @@ export function ProjectDashboard() {
           <section className="project-catalog" aria-label="Project folder catalog">
             <header className="project-catalog-header">
               <h1>lscfitouts</h1>
-              <p>Loaded from ./projects/&lt;client-name&gt;/glb and ./projects/&lt;client-name&gt;/pdf</p>
+              <p>Loaded from ./projects/&lt;client-name&gt;/&lt;job-name&gt;/...</p>
             </header>
 
             {folderStatuses.length === 0 ? (
@@ -498,7 +498,7 @@ export function ProjectDashboard() {
                 <section className="client-organizer" aria-label="Client and job organizer">
                   <header className="client-organizer-header">
                     <h2>Client / Job Organizer</h2>
-                    <p>Folder structure: projects/client/job-name/drawing-title</p>
+                    <p>Folder structure: projects/client/job-name/pdf-or-glb/drawing-folder/files</p>
                   </header>
 
                   {filteredClientTree.length === 0 ? (
@@ -646,6 +646,7 @@ export function ProjectDashboard() {
                       aria-label={entry.hasModel || entry.hasPdf ? `Open ${entry.projectName}` : undefined}
                     >
                       <h2>{entry.projectName}</h2>
+                      <p className="project-folder-path">Client: {entry.clientName || entry.clientSlug}</p>
                       <p className="project-folder-path">projects/{entry.projectFolder}</p>
 
                       <div className="project-card-action-row">
