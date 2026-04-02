@@ -4,7 +4,15 @@ export function HeaderBar() {
   return (
     <header className="dashboard-header-shell">
       <div className="header-brand">
-        <img src={logoSrc} alt="LSC Fitouts" className="header-logo" />
+        <img
+          src={logoSrc}
+          alt="LSC Fitouts"
+          className="header-logo"
+          onError={(event) => {
+            event.currentTarget.onerror = null
+            event.currentTarget.src = 'assets/logo.png'
+          }}
+        />
         <div className="header-copy">
           <strong>LSC Fitouts Client Viewer</strong>
           <span>3D + PDF Dashboard</span>

@@ -280,9 +280,9 @@ export function ProjectDashboard() {
 
   function openCatalogEntry(entry) {
     const destination = entry.hasModel
-      ? buildStandaloneViewerUrl(withBasePath(entry.modelFiles[0]))
+      ? buildStandaloneViewerUrl(entry.modelFiles[0])
       : entry.hasPdf
-        ? withBasePath(entry.drawingFiles[0])
+        ? entry.drawingFiles[0]
         : ''
 
     if (!destination) return
@@ -658,8 +658,8 @@ export function ProjectDashboard() {
 
                 <div className="project-catalog-grid">
                   {filteredFolderStatuses.map((entry) => {
-                    const modelUrl = entry.hasModel ? buildStandaloneViewerUrl(withBasePath(entry.modelFiles[0])) : ''
-                    const pdfUrl = entry.hasPdf ? withBasePath(entry.drawingFiles[0]) : ''
+                    const modelUrl = entry.hasModel ? buildStandaloneViewerUrl(entry.modelFiles[0]) : ''
+                    const pdfUrl = entry.hasPdf ? entry.drawingFiles[0] : ''
 
                     return (
                     <article
@@ -683,7 +683,7 @@ export function ProjectDashboard() {
                       <div className="project-card-action-row">
                         <div className="project-card-media">
                           {entry.hasPreview ? (
-                            <img src={withBasePath(entry.previewImage)} alt={`${entry.projectName} preview`} className="project-card-preview" />
+                            <img src={entry.previewImage} alt={`${entry.projectName} preview`} className="project-card-preview" />
                           ) : (
                             <div className="project-card-placeholder">No Preview</div>
                           )}

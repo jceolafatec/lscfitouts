@@ -153,7 +153,15 @@ export function ClientPage() {
     <div className="client-page-shell">
       <aside className="client-sidebar" aria-label="Client list">
         <div className="client-brand-wrap">
-          <img src={logoSrc} alt="LSC Fitouts" className="client-logo" />
+          <img
+            src={logoSrc}
+            alt="LSC Fitouts"
+            className="client-logo"
+            onError={(event) => {
+              event.currentTarget.onerror = null
+              event.currentTarget.src = 'assets/logo.png'
+            }}
+          />
           <p className="client-kicker">LSC Fitouts</p>
           <h1>{brandClientLabel}</h1>
           <p>Job: {brandJobLabel}</p>

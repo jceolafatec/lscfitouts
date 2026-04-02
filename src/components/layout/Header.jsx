@@ -4,7 +4,15 @@ export function Header({ project, title, subtitle, statusLabel }) {
   return (
     <header className="dashboard-header" aria-label="Project header">
       <div className="header-left">
-        <img src={logoSrc} alt="LSC Fitouts" className="header-logo" />
+        <img
+          src={logoSrc}
+          alt="LSC Fitouts"
+          className="header-logo"
+          onError={(event) => {
+            event.currentTarget.onerror = null
+            event.currentTarget.src = 'assets/logo.png'
+          }}
+        />
       </div>
 
       <div className="header-center">
