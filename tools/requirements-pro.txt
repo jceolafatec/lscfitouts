@@ -1,0 +1,17 @@
+# Portfolio Manager PRO Dependencies
+# Install with: pip install -r requirements.txt
+
+# No external dependencies needed! 
+# project_manager_pro.py uses only Python standard library:
+# - tkinter (built-in)
+# - json (built-in)
+# - xml.etree.ElementTree (built-in)
+# - shutil (built-in)
+# - pathlib (built-in)
+# - os (built-in)
+
+# Optional: PyInstaller to package as .exe
+# pyinstaller>=5.0
+
+# Optional: Pillow if you want to add image processing later
+# pillow>=9.0

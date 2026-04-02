@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Inbox</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      --bg: #f3f6f9;
+      --panel: #ffffff;
+      --line: #d6dee8;
+      --text: #132238;
+      --muted: #5d6b7a;
+      --accent: #0f5fbf;
+      --accent-soft: #eaf2ff;
+      --danger: #b3261e;
+      --ok: #0a7a28;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #eef3f8 0%, #f8fafc 100%);
+      color: var(--text);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar,
+    .detail {
+      padding: 1rem;
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(12px);
+    }
+    .detail {
+      display: grid;
+      gap: 1rem;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 1rem;
+      box-shadow: 0 16px 40px rgba(18, 34, 56, 0.06);
+    }
+    .toolbar {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    input, textarea, button {
+      font: inherit;
+    }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+    }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.8rem 1.1rem;
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #dfe8f2;
+      color: var(--text);
+    }
+    .submission-list {
+      display: grid;
+      gap: 0.75rem;
+      max-height: calc(100vh - 180px);
+      overflow: auto;
+      padding-right: 0.25rem;
+    }
+    .submission-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem;
+      background: white;
+      cursor: pointer;
+      text-align: left;
+    }
+    .submission-card.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .meta-item {
+      padding: 0.75rem;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+    }
+    .meta-item span,
+    .section-label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+    .attachment-list,
+    .response-list {
+      display: grid;
+      gap: 0.65rem;
+    }
+    .attachment,
+    .response {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.75rem;
+      background: #fff;
+    }
+    .status {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .status.error { color: var(--danger); }
+    .status.success { color: var(--ok); }
+    .empty {
+      color: var(--muted);
+      padding: 1.25rem;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.7);
+    }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .submission-list { max-height: none; }
+      .meta-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    window.PYTHA_ADMIN_INBOX_CONFIG = {
+      webAppUrl: "https://script.google.com/macros/s/AKfycbzYrYAKTniA2_QLqlGAdYXoPuaYCDwZMHdyTx8xC9F2A4TPukY3cFH565k5XHPfRHCcDg/exec",
+      adminToken: "87CvfLygJYZybdU4UIMDMnT3QjgkvgmlBU1DtKiuLJR5AHT6XzZmMX53o3UGrTdmgxFdUDuy7U2cI9soJFXjH1Rhf3X0BtlE202xpxlizIFNGUDdi5BDMvQF3LvvpFD0",
+      responderName: "Jeferson"
+    };
+  </script>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="toolbar">
+        <div>
+          <h1>Project Inbox</h1>
+          <p class="status">Private local tool. Keep this folder out of GitHub.</p>
+        </div>
+        <input id="search-input" type="search" placeholder="Search by name, email, project type" />
+        <button id="refresh-btn" class="secondary" type="button">Refresh Inbox</button>
+        <p id="sidebar-status" class="status"></p>
+      </div>
+      <div id="submission-list" class="submission-list"></div>
+    </aside>
+
+    <main class="detail">
+      <section class="panel">
+        <h2 id="detail-title">Select a submission</h2>
+        <p id="detail-subtitle" class="status">Choose a project inquiry from the inbox.</p>
+      </section>
+
+      <section class="panel">
+        <span class="section-label">Submission Details</span>
+        <div id="meta-grid" class="meta-grid"></div>
+      </section>
+
+      <section class="panel">
+        <span class="section-label">Project Brief</span>
+        <p id="brief-text" class="empty">No submission selected.</p>
+      </section>
+
+      <section class="panel">
+        <span class="section-label">Attachments</span>
+        <div id="attachment-list" class="attachment-list"></div>
+      </section>
+
+      <section class="panel">
+        <span class="section-label">Responses</span>
+        <div id="response-list" class="response-list"></div>
+      </section>
+
+      <section class="panel">
+        <span class="section-label">Save Response Note</span>
+        <div style="display:grid; gap:0.75rem;">
+          <input id="responder-name" type="text" placeholder="Responder name" />
+          <textarea id="response-message" placeholder="Write your response note here."></textarea>
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button id="save-response-btn" type="button">Save Response</button>
+            <a id="open-folder-link" class="status" href="#" target="_blank" rel="noreferrer">Open Drive folder</a>
+          </div>
+          <p id="detail-status" class="status"></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/upload.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

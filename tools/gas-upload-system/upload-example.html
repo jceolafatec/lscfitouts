@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Drive Upload Example</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      margin: 2rem;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    button {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    .ok { color: #0a7a28; }
+    .err { color: #b3261e; }
+  </style>
+</head>
+<body>
+  <h1>Upload File to Google Drive</h1>
+  <div class="card">
+    <p>Select a file and upload it to your Google Drive folder through Apps Script.</p>
+    <input type="file" id="fileInput" />
+    <button id="uploadBtn">Upload</button>
+    <div id="status"></div>
+  </div>
+
+  <script src="../../assets/js/upload.js"></script>
+  <script>
+    var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz6PhvzX43uKFCUq_Xj0KmzOHYotEGYQ6Hb5wwIU8Vec1Cpav_O5SVUcvXLHt2n98c09g/exec";
+    var SHARED_TOKEN = "4c5f7g8h910a8f9e2d1d4c5f7g8h910f9e2d1d4c5f4c5f7g8h910a8f9e2d1d4c5f7g8h910f9e2d1d4c5f";
+
+    var fileInput = document.getElementById("fileInput");
+    var uploadBtn = document.getElementById("uploadBtn");
+    var statusEl = document.getElementById("status");
+
+    function setStatus(message, isError) {
+      statusEl.textContent = message;
+      statusEl.className = isError ? "err" : "ok";
+    }
+
+    uploadBtn.addEventListener("click", async function () {
+      var file = fileInput.files && fileInput.files[0];
+      if (!file) {
+        setStatus("Please choose a file first.", true);
+        return;
+      }
+
+      setStatus("Uploading...", false);
+
+      try {
+        var result = await window.GASUploader.uploadFile({
+          webAppUrl: WEB_APP_URL,
+          token: SHARED_TOKEN,
+          file: file,
+          timeoutMs: 90000
+        });
+
+        if (result.success) {
+          setStatus("Success: " + result.fileName + " uploaded.", false);
+        } else {
+          setStatus("Upload failed: " + result.message, true);
+        }
+      } catch (error) {
+        setStatus("Error: " + error.message, true);
+      }
+    });
+  </script>
+</body>
+</html>

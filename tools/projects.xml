@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<projects>
+    <project id="1">
+        <title>Minimal Interface Study</title>
+        <meta>UI Design · Web · 2025</meta>
+        <description>
+            A clean interface concept focused on grid balance, neutral tones,
+            and micro-interactions.
+        </description>
+        <image>assets/img/project-01.jpg</image>
+    </project>
+
+    <project id="2">
+        <title>Calm Dashboard Layout</title>
+        <meta>Product Design · 2025</meta>
+        <description>
+            Dashboard concept using soft greys and responsive grid patterns.
+        </description>
+        <image>assets/img/project-02.jpg</image>
+    </project>
+<project id="3"><title>Test</title><meta>NEW ITEM</meta><description>TEST NEW ITEM</description><image /></project></projects>
