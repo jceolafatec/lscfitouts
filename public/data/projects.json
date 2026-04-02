@@ -1,5 +1,18 @@
 [
   {
+    "id": "demo-campervan",
+    "title": "Campervan Bed Fitout",
+    "client": "Demo Client",
+    "address": "Melbourne, VIC",
+    "date": "2026-01-15",
+    "status": "completed",
+    "description": "Custom campervan bed fitout with integrated storage and premium timber finishes. Interactive 3D model included.",
+    "model_path": "models/campervan.glb",
+    "pdf_path": "",
+    "image": "",
+    "gallery_images": []
+  },
+  {
     "id": "jbhifi-sydney",
     "title": "JB Hi-Fi Sydney",
     "client": "JB Hi-Fi",
@@ -7,13 +20,10 @@
     "date": "2026-02-15",
     "status": "completed",
     "description": "Complete shopfitting project including custom display shelving and POS counter systems.",
-    "model_path": "projects/JB-Hi-Fi/models/main-model.glb",
-    "pdf_path": "projects/JB-Hi-Fi/drawings/plan-set.pdf",
-    "image": "projects/JB-Hi-Fi/thumbnail.jpg",
-    "gallery_images": [
-      "projects/JB-Hi-Fi/gallery/render-1.jpg",
-      "projects/JB-Hi-Fi/gallery/render-2.jpg"
-    ]
+    "model_path": "",
+    "pdf_path": "",
+    "image": "",
+    "gallery_images": []
   },
   {
     "id": "dental-clinic-parkview",
@@ -23,9 +33,9 @@
     "date": "2025-11-30",
     "status": "completed",
     "description": "Professional dental facility fitout with sterilization lab, reception, and procedure rooms.",
-    "model_path": "projects/DDA-Dental-Parkview/models/main-model.glb",
-    "pdf_path": "projects/DDA-Dental-Parkview/drawings/floor-plan.pdf",
-    "image": "projects/DDA-Dental-Parkview/thumbnail.jpg",
+    "model_path": "",
+    "pdf_path": "",
+    "image": "",
     "gallery_images": []
   },
   {
@@ -36,9 +46,9 @@
     "date": "2025-10-15",
     "status": "completed",
     "description": "Custom kitchen cabinetry with integrated appliances and premium finishes.",
-    "model_path": "projects/Residential-Kitchen/models/kitchen.glb",
-    "pdf_path": "projects/Residential-Kitchen/drawings/elevations.pdf",
-    "image": "projects/Residential-Kitchen/thumbnail.jpg",
+    "model_path": "",
+    "pdf_path": "",
+    "image": "",
     "gallery_images": []
   },
   {
@@ -49,22 +59,9 @@
     "date": "2025-09-20",
     "status": "in_progress",
     "description": "Large-scale commercial office fit-out with workstations and meeting areas.",
-    "model_path": "projects/Corporate-Office/models/full-layout.glb",
-    "pdf_path": "projects/Corporate-Office/drawings/master-plan.pdf",
-    "image": "projects/Corporate-Office/thumbnail.jpg",
-    "gallery_images": []
-  },
-  {
-    "id": "retail-shopfront",
-    "title": "Retail Shopfront",
-    "client": "Retail Brand",
-    "address": "Northland, VIC",
-    "date": "2025-08-10",
-    "status": "completed",
-    "description": "Modern retail shopfront with custom fixtures and integrated lighting.",
-    "model_path": "projects/Retail-Shopfront/models/storefront.glb",
-    "pdf_path": "projects/Retail-Shopfront/drawings/shop-plan.pdf",
-    "image": "projects/Retail-Shopfront/thumbnail.jpg",
+    "model_path": "",
+    "pdf_path": "",
+    "image": "",
     "gallery_images": []
   }
 ]
