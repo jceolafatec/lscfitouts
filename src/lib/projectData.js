@@ -1,4 +1,5 @@
 import { withBasePath } from './pathing'
+import { normalizeExternalAssetUrl } from './externalAssets'
 
 export async function loadProjectData() {
   const response = await fetch(withBasePath('/data/projects.json'))
@@ -32,7 +33,7 @@ export function loadProjectFromUrl(dataMap, search = window.location.search) {
 
 export function resolveProjectAssetPath(projectId, project, assetPath) {
   if (!assetPath) return ''
-  if (/^https?:\/\//i.test(assetPath)) return assetPath
+  if (/^https?:\/\//i.test(assetPath)) return normalizeExternalAssetUrl(assetPath)
   if (assetPath.startsWith('/')) return assetPath
 
   const folder = project?.projectFolder || projectId

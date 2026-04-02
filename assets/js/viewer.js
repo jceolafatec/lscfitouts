@@ -2379,12 +2379,45 @@ function getUrlParam(param) {
     return urlParams.get(param);
 }
 
+function normalizeGoogleDriveModelUrl(rawValue) {
+    const value = (rawValue || '').trim();
+    if (!value) return '';
+
+    try {
+        const parsed = new URL(value);
+        const host = parsed.hostname.toLowerCase();
+        if (host !== 'drive.google.com' && host !== 'docs.google.com') {
+            return value;
+        }
+
+        if (/\/drive\/folders\//i.test(parsed.pathname)) {
+            throw new Error('Google Drive folder links are not direct model files. Use a file link instead.');
+        }
+
+        let fileId = parsed.searchParams.get('id') || '';
+        if (!fileId) {
+            const fileMatch = parsed.pathname.match(/\/file\/d\/([^/]+)/i);
+            if (fileMatch && fileMatch[1]) {
+                fileId = fileMatch[1];
+            }
+        }
+
+        if (!fileId) return value;
+        return `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+    } catch (error) {
+        if (error instanceof Error) {
+            throw error;
+        }
+        return value;
+    }
+}
+
 // ====================================
 // Load Project Data & Model Info
 // ====================================
 async function loadProjectData() {
     try {
-        const modelPath = getUrlParam('model');
+        const modelPath = normalizeGoogleDriveModelUrl(getUrlParam('model'));
         const projectId = getUrlParam('id');
 
         if (!modelPath) {

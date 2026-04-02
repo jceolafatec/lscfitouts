@@ -6,6 +6,7 @@ import { loadProjectFolderStatuses } from '../lib/projectFolders'
 import { loadClientDrawingTree } from '../lib/clientFolders'
 import { deleteProjectMeta, loadProjectMeta, saveProjectMeta } from '../lib/projectMetaXml'
 import { withBasePath } from '../lib/pathing'
+import { normalizeExternalAssetUrl } from '../lib/externalAssets'
 
 const INVALID_LINK_MESSAGE = 'This project link is invalid or expired. Please contact LSC Fitouts.'
 const LazyThreeDViewer = lazy(() => import('../components/ThreeDViewer').then((module) => ({ default: module.ThreeDViewer })))
@@ -124,6 +125,15 @@ export function ProjectDashboard() {
             ;(meta.drawings || []).forEach((drawing) => {
               if (!drawing.slug) return
               next[`drawing:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.name || drawing.slug
+              if (drawing.modelUrl) {
+                next[`modelUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = normalizeExternalAssetUrl(drawing.modelUrl)
+              }
+              if (drawing.pdfUrl) {
+                next[`pdfUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.pdfUrl
+              }
+              if (drawing.imageUrl) {
+                next[`imageUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.imageUrl
+              }
             })
           } catch {
             // Ignore missing/failed metadata and keep dashboard operational.
@@ -202,9 +212,21 @@ export function ProjectDashboard() {
             const jobId = `${client.clientSlug}/${job.jobSlug}`
             const drawings = job.drawings.map((drawing) => {
               const drawingId = `${client.clientSlug}/${job.jobSlug}/${drawing.drawingSlug}`
+              const overrideModelUrl = apiOverrides[`modelUrl:${drawingId}`] || ''
+              const overridePdfUrl = apiOverrides[`pdfUrl:${drawingId}`] || ''
+              const overrideImageUrl = apiOverrides[`imageUrl:${drawingId}`] || ''
+              const modelFiles = overrideModelUrl ? [overrideModelUrl] : drawing.modelFiles
+              const drawingFiles = overridePdfUrl ? [overridePdfUrl] : drawing.drawingFiles
+              const imageFiles = overrideImageUrl ? [overrideImageUrl] : drawing.imageFiles
               return {
                 ...drawing,
                 displayTitle: decorate('drawing', drawingId, drawing.title),
+                modelFiles,
+                drawingFiles,
+                imageFiles,
+                coverImage: imageFiles[0] || '',
+                hasModel: modelFiles.length > 0,
+                hasPdf: drawingFiles.length > 0,
               }
             })
 
@@ -332,6 +354,9 @@ export function ProjectDashboard() {
     const drawings = job.drawings.map((drawing) => ({
       slug: drawing.drawingSlug,
       name: (draft.drawings?.[drawing.drawingSlug] || drawing.title || '').trim(),
+      modelUrl: drawing.modelFiles?.[0] || '',
+      pdfUrl: drawing.drawingFiles?.[0] || '',
+      imageUrl: drawing.imageFiles?.[0] || '',
     }))
 
     const nextLocalOverrides = { ...labelOverrides }
@@ -348,6 +373,9 @@ export function ProjectDashboard() {
       next[`job:${jobId}`] = jobName
       drawings.forEach((drawing) => {
         next[`drawing:${jobId}/${drawing.slug}`] = drawing.name
+        if (drawing.modelUrl) next[`modelUrl:${jobId}/${drawing.slug}`] = drawing.modelUrl
+        if (drawing.pdfUrl) next[`pdfUrl:${jobId}/${drawing.slug}`] = drawing.pdfUrl
+        if (drawing.imageUrl) next[`imageUrl:${jobId}/${drawing.slug}`] = drawing.imageUrl
       })
       return next
     })
@@ -377,6 +405,9 @@ export function ProjectDashboard() {
       delete next[`job:${jobId}`]
       job.drawings.forEach((drawing) => {
         delete next[`drawing:${jobId}/${drawing.drawingSlug}`]
+        delete next[`modelUrl:${jobId}/${drawing.drawingSlug}`]
+        delete next[`pdfUrl:${jobId}/${drawing.drawingSlug}`]
+        delete next[`imageUrl:${jobId}/${drawing.drawingSlug}`]
       })
       return next
     })

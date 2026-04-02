@@ -29,7 +29,14 @@ export function serializeProjectMetaXml(payload) {
   ]
 
   ;(drawings || []).forEach((item) => {
-    lines.push(`    <drawing slug="${escapeXml(item.slug)}" name="${escapeXml(item.name)}" />`)
+    const attrs = [
+      `slug="${escapeXml(item.slug)}"`,
+      `name="${escapeXml(item.name)}"`,
+    ]
+    if (item.modelUrl) attrs.push(`modelUrl="${escapeXml(item.modelUrl)}"`)
+    if (item.pdfUrl) attrs.push(`pdfUrl="${escapeXml(item.pdfUrl)}"`)
+    if (item.imageUrl) attrs.push(`imageUrl="${escapeXml(item.imageUrl)}"`)
+    lines.push(`    <drawing ${attrs.join(' ')} />`)
   })
 
   lines.push('  </drawings>')
@@ -52,6 +59,9 @@ export function parseProjectMetaXml(xmlText) {
   const drawings = Array.from(doc.querySelectorAll('drawings > drawing')).map((node) => ({
     slug: node.getAttribute('slug') || '',
     name: node.getAttribute('name') || '',
+    modelUrl: node.getAttribute('modelUrl') || '',
+    pdfUrl: node.getAttribute('pdfUrl') || '',
+    imageUrl: node.getAttribute('imageUrl') || '',
   }))
 
   return {

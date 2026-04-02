@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { loadClientDrawingTree } from '../lib/clientFolders'
 import { loadProjectMeta } from '../lib/projectMetaXml'
 import { withBasePath } from '../lib/pathing'
+import { normalizeExternalAssetUrl } from '../lib/externalAssets'
 
 function buildViewerUrl(modelUrl) {
   const viewerUrl = withBasePath('/viewer.html')
@@ -52,6 +53,15 @@ export function ClientPage() {
             ;(meta.drawings || []).forEach((drawing) => {
               if (!drawing.slug) return
               next[`drawing:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.name || drawing.slug
+              if (drawing.modelUrl) {
+                next[`modelUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = normalizeExternalAssetUrl(drawing.modelUrl)
+              }
+              if (drawing.pdfUrl) {
+                next[`pdfUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.pdfUrl
+              }
+              if (drawing.imageUrl) {
+                next[`imageUrl:${client.clientSlug}/${job.jobSlug}/${drawing.slug}`] = drawing.imageUrl
+              }
             })
           } catch {
             // Keep page functional if metadata endpoint is unavailable.
@@ -81,6 +91,20 @@ export function ClientPage() {
           const drawings = job.drawings.map((drawing) => ({
             ...drawing,
             title: apiOverrides[`drawing:${jobKey}/${drawing.drawingSlug}`] || drawing.title,
+            modelFiles: apiOverrides[`modelUrl:${jobKey}/${drawing.drawingSlug}`]
+              ? [apiOverrides[`modelUrl:${jobKey}/${drawing.drawingSlug}`]]
+              : drawing.modelFiles,
+            drawingFiles: apiOverrides[`pdfUrl:${jobKey}/${drawing.drawingSlug}`]
+              ? [apiOverrides[`pdfUrl:${jobKey}/${drawing.drawingSlug}`]]
+              : drawing.drawingFiles,
+            imageFiles: apiOverrides[`imageUrl:${jobKey}/${drawing.drawingSlug}`]
+              ? [apiOverrides[`imageUrl:${jobKey}/${drawing.drawingSlug}`]]
+              : drawing.imageFiles,
+          })).map((drawing) => ({
+            ...drawing,
+            coverImage: drawing.imageFiles?.[0] || '',
+            hasModel: (drawing.modelFiles || []).length > 0,
+            hasPdf: (drawing.drawingFiles || []).length > 0,
           }))
           return {
             ...job,
