@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LSC Fitouts – Client Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --navy:  #0A0A0A;
+      --gold:  #C8A45D;
+      --gold-l:#D9BB7D;
+      --white: #FFFFFF;
+      --grey:  #F5F5F5;
+      --grey-2:#EBEBEB;
+      --grey-3:#C8C8C8;
+      --text:  #1A1A1A;
+      --text-m:#666666;
+      --sidebar-w: 260px;
+      --header-h:  64px;
+      --radius: 8px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.10);
+    }
+
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--grey);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ──────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ── Header ──────────────────────────────────────── */
+    #header {
+      height: var(--header-h);
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      flex-shrink: 0;
+      z-index: 30;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--gold);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .logo-text {
+      color: var(--white);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+    .logo-sub {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    .header-project {
+      text-align: center;
+      flex: 1;
+      padding: 0 1rem;
+    }
+    .header-project-name {
+      color: var(--white);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-project-client {
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin: 0.1rem 0 0;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .status-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .status-active    { background: rgba(72,199,142,0.15); color: #48c78e; }
+    .status-progress  { background: rgba(200,164,93,0.2);  color: var(--gold); }
+    .status-completed { background: rgba(255,255,255,0.1); color: var(--grey-3); }
+
+    /* ── Body ────────────────────────────────────────── */
+    #body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: var(--white);
+      border-right: 1px solid var(--grey-2);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      padding: 1.25rem 1.25rem 0;
+    }
+    .sidebar-section + .sidebar-section {
+      border-top: 1px solid var(--grey-2);
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .sidebar-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-m);
+      margin: 0 0 0.75rem;
+    }
+
+    .info-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      margin-bottom: 0.9rem;
+    }
+    .info-key {
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-m);
+    }
+    .info-val {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    /* Sidebar nav */
+    .sidebar-nav { list-style: none; margin: 0; padding: 0 0 1.25rem; }
+    .sidebar-nav li + li { margin-top: 0.15rem; }
+    .sidebar-nav button {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 1.25rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: var(--text-m);
+      border-radius: 0;
+      transition: background 0.15s, color 0.15s;
+      text-align: left;
+    }
+    .sidebar-nav button:hover { background: var(--grey); color: var(--text); }
+    .sidebar-nav button.active {
+      background: rgba(200,164,93,0.12);
+      color: var(--navy);
+      font-weight: 600;
+    }
+    .sidebar-nav button.active .nav-icon { color: var(--gold); }
+    .nav-icon { width: 18px; text-align: center; flex-shrink: 0; }
+
+    /* Model / drawing list in sidebar */
+    .asset-list { list-style: none; margin: 0 0 1.25rem; padding: 0; }
+    .asset-list li {
+      padding: 0.4rem 0;
+      font-size: 0.78rem;
+      color: var(--text-m);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: default;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .asset-list li.clickable { cursor: pointer; }
+    .asset-list li.clickable:hover { color: var(--gold); }
+    .asset-list li.selected-asset { color: var(--gold); font-weight: 600; }
+    .asset-list li .asset-icon { font-size: 0.82rem; flex-shrink: 0; }
+
+    .sidebar-notes {
+      font-size: 0.78rem;
+      color: var(--text-m);
+      line-height: 1.55;
+      padding-bottom: 1.25rem;
+    }
+
+    /* ── Main content ─────────────────────────────────── */
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Tab bar ─────────────────────────────────────── */
+    #tab-bar {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-2);
+      padding: 0 1.5rem;
+      flex-shrink: 0;
+      gap: 0.25rem;
+    }
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-m);
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 600; }
+
+    /* ── Viewer panels ───────────────────────────────── */
+    #viewer-area { flex: 1; position: relative; overflow: hidden; }
+
+    .viewer-panel {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+    }
+    .viewer-panel.visible { display: flex; }
+
+    /* ── 3D Viewer ───────────────────────────────────── */
+    #panel-3d {
+      background: #111118;
+    }
+
+    #canvas-wrapper {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #model-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* 3D overlays */
+    .viewer-overlay {
+      position: absolute;
+      pointer-events: none;
+      z-index: 5;
+    }
+    #loading-3d {
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: rgba(255,255,255,0.6);
+      font-size: 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    #error-3d {
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10,10,14,0.92);
+      border: 1px solid rgba(255,80,80,0.4);
+      color: #ff7070;
+      padding: 1.2rem 1.6rem;
+      border-radius: var(--radius);
+      max-width: 340px;
+      font-size: 0.82rem;
+      text-align: center;
+      display: none;
+      pointer-events: auto;
+    }
+    #orbit-hint-3d {
+      bottom: 4.5rem; left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.28);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: opacity 1.5s;
+      white-space: nowrap;
+    }
+    #orbit-hint-3d.fade { opacity: 0; }
+
+    /* Parts panel */
+    #parts-panel {
+      position: absolute;
+      top: 0.75rem; left: 0.75rem;
+      background: rgba(18,18,28,0.90);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 0.9rem 1.1rem;
+      color: rgba(255,255,255,0.85);
+      font-size: 0.78rem;
+      max-height: calc(100% - 5rem);
+      overflow-y: auto;
+      display: none;
+      min-width: 160px;
+      z-index: 10;
+    }
+    #parts-panel h3 {
+      margin: 0 0 0.65rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.45);
+    }
+    .part-toggle {
+      display: flex; align-items: center; gap: 0.45rem;
+      margin-bottom: 0.35rem;
+    }
+    .part-toggle label { cursor: pointer; }
+    .part-toggle input[type=checkbox] { accent-color: var(--gold); }
+
+    /* Controls bar for 3D */
+    #controls-3d {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.75rem 1rem;
+      background: rgba(10,10,16,0.82);
+      backdrop-filter: blur(6px);
+      flex-shrink: 0;
+    }
+    .ctrl-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.82);
+      border-radius: 5px;
+      padding: 0.32rem 0.8rem;
+      font-size: 0.7rem;
+      font-family: inherit;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .ctrl-btn:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); color: #fff; }
+    .ctrl-btn.active { background: rgba(200,164,93,0.22); border-color: rgba(200,164,93,0.6); color: var(--gold-l); }
+
+    /* Toast */
+    #toast-container {
+      position: absolute;
+      top: 0.75rem; right: 0.75rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(200,164,93,0.15);
+      border: 1px solid rgba(200,164,93,0.4);
+      color: var(--gold-l);
+      padding: 0.5rem 0.9rem;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      backdrop-filter: blur(8px);
+      animation: toastIn 0.25s ease;
+      pointer-events: auto;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .toast.fading { opacity: 0; transition: opacity 0.4s; }
+
+    /* ── PDF Viewer ──────────────────────────────────── */
+    #panel-pdf {
+      background: var(--grey);
+      flex-direction: column;
+    }
+
+    #pdf-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.65rem 1.25rem;
+      background: var(--white);
+      border-bottom: 1px solid var(--grey-2);
+      flex-shrink: 0;
+    }
+    .pdf-btn {
+      background: var(--grey);
+      border: 1px solid var(--grey-2);
+      color: var(--text);
+      border-radius: 5px;
+      padding: 0.32rem 0.7rem;
+      font-size: 0.78rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      font-weight: 500;
+    }
+    .pdf-btn:hover { background: var(--grey-2); border-color: var(--grey-3); }
+    .pdf-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #pdf-page-info { font-size: 0.78rem; color: var(--text-m); font-weight: 500; white-space: nowrap; }
+    #pdf-zoom-select {
+      border: 1px solid var(--grey-2);
+      border-radius: 5px;
+      padding: 0.28rem 0.5rem;
+      font-family: inherit;
+      font-size: 0.78rem;
+      background: var(--grey);
+      color: var(--text);
+      cursor: pointer;
+    }
+    #pdf-filename {
+      font-size: 0.78rem;
+      color: var(--text-m);
+      margin-left: auto;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    #pdf-canvas-wrap {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+    #pdf-canvas {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      display: none;
+    }
+
+    #pdf-loading, #pdf-error, #pdf-no-drawings {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-m);
+    }
+    #pdf-no-drawings { display: none; }
+    #pdf-error { display: none; color: #d9534f; }
+
+    /* ── Error page ──────────────────────────────────── */
+    #error-page {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      background: var(--navy);
+      padding: 2rem;
+    }
+    .error-logo-mark {
+      width: 56px; height: 56px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 0 auto 1.5rem;
+    }
+    .error-page-title {
+      color: var(--white);
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem;
+    }
+    .error-page-sub {
+      color: var(--gold);
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin: 0 0 2rem;
+    }
+    .error-page-msg {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      max-width: 380px;
+      margin: 0 auto;
+    }
+    .error-page-msg strong { color: var(--white); }
+    .error-contact {
+      margin-top: 2rem;
+      display: inline-block;
+      padding: 0.65rem 1.5rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .error-contact:hover { background: rgba(200,164,93,0.12); }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 100%; }
+      #body { flex-direction: column; }
+      #sidebar { width: 100%; max-height: 200px; border-right: none; border-bottom: 1px solid var(--grey-2); }
+      .sidebar-nav { display: flex; overflow-x: auto; padding: 0; }
+      .sidebar-nav li + li { margin: 0; }
+      .sidebar-nav button { white-space: nowrap; border-bottom: 2px solid transparent; }
+      .sidebar-nav button.active { border-bottom-color: var(--gold); }
+      #tab-bar { padding: 0 0.75rem; }
+      #controls-3d { padding: 0.5rem 0.75rem; }
+      .ctrl-btn { padding: 0.28rem 0.6rem; font-size: 0.65rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Error page (shown when project not found) ─── -->
+<div id="error-page">
+  <div class="error-logo-mark">LSC</div>
+  <h1 class="error-page-title">Project Not Found</h1>
+  <p class="error-page-sub">LSC Fitouts Client Dashboard</p>
+  <p class="error-page-msg">
+    <strong>This project link is invalid or expired.</strong><br />
+    Please contact LSC Fitouts for an updated link or to request access to your project.
+  </p>
+  <a class="error-contact" href="https://lscfitouts.com.au" target="_blank" rel="noopener">
+    Contact LSC Fitouts
+  </a>
+</div>
+
+<!-- ── Main dashboard ────────────────────────────── -->
+<div id="app">
+
+  <!-- Header -->
+  <header id="header">
+    <a class="header-logo" href="https://lscfitouts.com.au" target="_blank" rel="noopener">
+      <div class="logo-mark">LSC</div>
+      <span class="logo-text">
+        LSC Fitouts
+        <span class="logo-sub">Client Portal</span>
+      </span>
+    </a>
+
+    <div class="header-project">
+      <p class="header-project-name" id="hdr-name">Loading…</p>
+      <p class="header-project-client" id="hdr-client"></p>
+    </div>
+
+    <div class="header-right">
+      <span class="status-badge" id="hdr-status"></span>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div id="body">
+
+    <!-- Sidebar -->
+    <aside id="sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">Project Info</p>
+        <div class="info-row">
+          <span class="info-key">Client</span>
+          <span class="info-val" id="sb-client">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Address</span>
+          <span class="info-val" id="sb-address">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Date</span>
+          <span class="info-val" id="sb-date">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-key">Status</span>
+          <span class="info-val" id="sb-status">—</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section" style="padding-bottom:0;">
+        <p class="sidebar-label">Navigation</p>
+        <ul class="sidebar-nav" id="sidebar-nav">
+          <li>
+            <button data-tab="3d" class="active" onclick="switchTab('3d')">
+              <span class="nav-icon">⬡</span> 3D Model
+            </button>
+          </li>
+          <li>
+            <button data-tab="pdf" onclick="switchTab('pdf')">
+              <span class="nav-icon">📄</span> Shop Drawings
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section" id="sb-models-section">
+        <p class="sidebar-label">Models</p>
+        <ul class="asset-list" id="sb-models"></ul>
+      </div>
+
+      <div class="sidebar-section" id="sb-drawings-section" style="display:none;">
+        <p class="sidebar-label">Drawings</p>
+        <ul class="asset-list" id="sb-drawings"></ul>
+      </div>
+
+      <div class="sidebar-section" id="sb-notes-section" style="display:none;">
+        <p class="sidebar-label">Notes</p>
+        <p class="sidebar-notes" id="sb-notes"></p>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main id="main">
+
+      <!-- Tab bar -->
+      <div id="tab-bar">
+        <button class="tab-btn active" data-tab="3d" onclick="switchTab('3d')">
+          <span>⬡</span> 3D Model
+        </button>
+        <button class="tab-btn" data-tab="pdf" onclick="switchTab('pdf')">
+          <span>📄</span> Shop Drawings
+        </button>
+      </div>
+
+      <!-- Viewer area -->
+      <div id="viewer-area">
+
+        <!-- 3D Panel -->
+        <div class="viewer-panel visible" id="panel-3d">
+          <div id="canvas-wrapper">
+            <canvas id="model-canvas"></canvas>
+
+            <div class="viewer-overlay" id="loading-3d">Loading 3D model…</div>
+            <div class="viewer-overlay" id="error-3d"></div>
+            <p class="viewer-overlay" id="orbit-hint-3d">
+              Drag to rotate &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Right-drag to pan
+            </p>
+
+            <div id="parts-panel">
+              <h3>Parts</h3>
+              <div id="part-toggles"></div>
+            </div>
+
+            <div id="toast-container"></div>
+          </div>
+
+          <div id="controls-3d">
+            <button class="ctrl-btn active" id="btn-edges" onclick="d3.toggleEdges()">Edges: On</button>
+            <button class="ctrl-btn" id="btn-wire" onclick="d3.toggleWireframe()">Wireframe: Off</button>
+            <button class="ctrl-btn" onclick="d3.resetCamera()">Reset View</button>
+            <button class="ctrl-btn" id="btn-focus" onclick="d3.focusSelection()">Focus Part</button>
+            <button class="ctrl-btn" id="btn-isolate" onclick="d3.isolateSelection()">Isolate</button>
+            <button class="ctrl-btn" id="btn-show-all" onclick="d3.showAllParts()">Show All</button>
+            <button class="ctrl-btn" id="btn-auto-rotate" onclick="d3.toggleAutoRotate()">Auto Rotate: Off</button>
+            <button class="ctrl-btn" onclick="d3.captureScreenshot()">Screenshot</button>
+            <button class="ctrl-btn" id="btn-parts" onclick="d3.togglePartsPanel()">Parts</button>
+          </div>
+        </div>
+
+        <!-- PDF Panel -->
+        <div class="viewer-panel" id="panel-pdf">
+          <div id="pdf-toolbar">
+            <button class="pdf-btn" id="pdf-prev" onclick="pdfViewer.prevPage()" disabled>&#8592; Prev</button>
+            <span id="pdf-page-info">Page — of —</span>
+            <button class="pdf-btn" id="pdf-next" onclick="pdfViewer.nextPage()" disabled>Next &#8594;</button>
+            <select id="pdf-zoom-select" onchange="pdfViewer.setZoom(this.value)">
+              <option value="0.5">50%</option>
+              <option value="0.75">75%</option>
+              <option value="1" selected>100%</option>
+              <option value="1.25">125%</option>
+              <option value="1.5">150%</option>
+              <option value="2">200%</option>
+            </select>
+            <span id="pdf-filename"></span>
+          </div>
+          <div id="pdf-canvas-wrap">
+            <canvas id="pdf-canvas"></canvas>
+            <div id="pdf-loading">
+              <span>Loading PDF…</span>
+            </div>
+            <div id="pdf-error">
+              <span>⚠ Failed to load PDF.</span>
+              <small>The file may be missing or inaccessible.</small>
+            </div>
+            <div id="pdf-no-drawings">
+              <span style="font-size:2rem;">📄</span>
+              <p style="margin:0;">No shop drawings available for this project.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+
+<!-- PDF.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+</script>
+
+<script>
+/* ===================================================
+   DATA LOADING
+   =================================================== */
+function getUrlParam(key) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(key);
+}
+
+async function loadProjectData() {
+  const projectId = getUrlParam('p');
+  if (!projectId) { showErrorPage(); return; }
+
+  let data;
+  try {
+    const res = await fetch('public/data/projects.json');
+    if (!res.ok) throw new Error('fetch failed');
+    data = await res.json();
+  } catch {
+    showErrorPage();
+    return;
+  }
+
+  const project = data[projectId];
+  if (!project) { showErrorPage(); return; }
+
+  applyProject(project);
+}
+
+function showErrorPage() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('error-page').style.display = 'flex';
+  document.title = 'LSC Fitouts – Project Not Found';
+}
+
+function applyProject(p) {
+  document.title = `${p.name} – LSC Fitouts`;
+
+  // Header
+  document.getElementById('hdr-name').textContent = p.name;
+  document.getElementById('hdr-client').textContent = p.client || '';
+
+  const statusEl = document.getElementById('hdr-status');
+  const statusMap = {
+    'active':      { cls: 'status-active',    label: 'Active' },
+    'in progress': { cls: 'status-progress',  label: 'In Progress' },
+    'completed':   { cls: 'status-completed', label: 'Completed' },
+  };
+  const key = (p.status || '').toLowerCase();
+  const s = statusMap[key] || { cls: 'status-progress', label: p.status || '' };
+  statusEl.classList.add(s.cls);
+  statusEl.textContent = s.label;
+
+  // Sidebar info
+  document.getElementById('sb-client').textContent  = p.client  || '—';
+  document.getElementById('sb-address').textContent = p.address || '—';
+  document.getElementById('sb-date').textContent    = p.date    || '—';
+  document.getElementById('sb-status').textContent  = p.status  || '—';
+
+  // Notes
+  if (p.notes && p.notes.trim()) {
+    document.getElementById('sb-notes').textContent = p.notes;
+    document.getElementById('sb-notes-section').style.display = 'block';
+  }
+
+  // Models list
+  const modelsList = document.getElementById('sb-models');
+  modelsList.innerHTML = '';
+  if (p.models && p.models.length) {
+    p.models.forEach((m, i) => {
+      const li = document.createElement('li');
+      li.className = 'clickable' + (i === 0 ? ' selected-asset' : '');
+      li.innerHTML = `<span class="asset-icon">⬡</span> ${m.name}`;
+      li.onclick = () => {
+        modelsList.querySelectorAll('li').forEach(x => x.classList.remove('selected-asset'));
+        li.classList.add('selected-asset');
+        d3.loadModel(m.url);
+        switchTab('3d');
+      };
+      modelsList.appendChild(li);
+    });
+  } else {
+    modelsList.innerHTML = '<li>No models available.</li>';
+  }
+
+  // Drawings list
+  const drawingsList = document.getElementById('sb-drawings');
+  drawingsList.innerHTML = '';
+  if (p.drawings && p.drawings.length) {
+    document.getElementById('sb-drawings-section').style.display = 'block';
+    p.drawings.forEach((d, i) => {
+      const li = document.createElement('li');
+      li.className = 'clickable' + (i === 0 ? ' selected-asset' : '');
+      li.innerHTML = `<span class="asset-icon">📄</span> ${d.name}`;
+      li.onclick = () => {
+        drawingsList.querySelectorAll('li').forEach(x => x.classList.remove('selected-asset'));
+        li.classList.add('selected-asset');
+        pdfViewer.loadFile(d.url, d.name);
+        switchTab('pdf');
+      };
+      drawingsList.appendChild(li);
+    });
+  }
+
+  // Load first model automatically
+  if (p.models && p.models.length) {
+    d3.loadModel(p.models[0].url);
+  } else {
+    document.getElementById('loading-3d').style.display = 'none';
+    showError3D('No 3D model available for this project.');
+  }
+
+  // Load first drawing if PDF tab is active
+  if (p.drawings && p.drawings.length) {
+    pdfViewer.loadFile(p.drawings[0].url, p.drawings[0].name);
+  }
+}
+
+/* ===================================================
+   TAB SWITCHING
+   =================================================== */
+function switchTab(tab) {
+  document.querySelectorAll('.viewer-panel').forEach(el => el.classList.remove('visible'));
+  document.getElementById(`panel-${tab}`).classList.add('visible');
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  document.querySelectorAll('#sidebar-nav button').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+
+  if (tab === '3d') {
+    document.getElementById('sb-models-section').style.display = 'block';
+    document.getElementById('sb-drawings-section').style.display =
+      document.getElementById('sb-drawings').children.length > 0 ? 'block' : 'none';
+    d3.onResize();
+  } else if (tab === 'pdf') {
+    document.getElementById('sb-models-section').style.display = 'none';
+    document.getElementById('sb-drawings-section').style.display = 'block';
+  }
+}
+
+/* ===================================================
+   3D VIEWER
+   =================================================== */
+const d3 = (() => {
+  let scene, camera, renderer, controls;
+  let currentModel = null;
+  let edgesVisible = true;
+  let wireframeVisible = false;
+  let autoRotateEnabled = false;
+  let selectedParts = [];
+  let raycaster, pointer;
+  let cameraTween = null;
+  let animId = null;
+
+  function showLoading(msg) {
+    const el = document.getElementById('loading-3d');
+    el.style.display = 'block';
+    el.textContent = msg || 'Loading 3D model…';
+    document.getElementById('error-3d').style.display = 'none';
+  }
+  function hideLoading() {
+    document.getElementById('loading-3d').style.display = 'none';
+  }
+
+  function init() {
+    const canvas = document.getElementById('model-canvas');
+    const wrapper = document.getElementById('canvas-wrapper');
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x111118);
+
+    const w = wrapper.clientWidth || 800;
+    const h = wrapper.clientHeight || 600;
+    camera = new THREE.PerspectiveCamera(50, w / h, 0.01, 1000);
+    camera.position.set(0, 2, 5);
+
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(w, h);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(5, 10, 7);
+    sun.castShadow = true;
+    scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xffffff, 0.4);
+    fill.position.set(-5, 5, -5);
+    scene.add(fill);
+
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.07;
+    controls.screenSpacePanning = true;
+
+    raycaster = new THREE.Raycaster();
+    pointer   = new THREE.Vector2();
+
+    renderer.domElement.addEventListener('click', onCanvasClick);
+
+    animate();
+
+    // Orbit hint fade
+    setTimeout(() => {
+      const h = document.getElementById('orbit-hint-3d');
+      if (h) h.classList.add('fade');
+    }, 5000);
+  }
+
+  function animate() {
+    animId = requestAnimationFrame(animate);
+    if (cameraTween) updateCameraTween();
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  function onResize() {
+    const wrapper = document.getElementById('canvas-wrapper');
+    const w = wrapper.clientWidth;
+    const h = wrapper.clientHeight;
+    if (!w || !h) return;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+
+  /* ─ Model loading ─ */
+  function loadModel(url) {
+    showLoading('Loading 3D model…');
+    document.getElementById('part-toggles').innerHTML = '';
+    document.getElementById('parts-panel').style.display = 'none';
+
+    if (currentModel) {
+      scene.remove(currentModel);
+      currentModel = null;
+    }
+
+    patchImageLoader();
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      url,
+      (gltf) => {
+        const model = gltf.scene;
+        currentModel = model;
+
+        // Centre and fit
+        const box = new THREE.Box3().setFromObject(model);
+        const size   = box.getSize(new THREE.Vector3());
+        const centre = box.getCenter(new THREE.Vector3());
+        model.position.sub(centre);
+
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale  = 3.5 / maxDim;
+        model.scale.setScalar(scale);
+
+        scene.add(model);
+        addEdgeLines(model);
+        buildPartsPanel(model);
+
+        // Fit camera
+        const dist = maxDim * scale * 1.6;
+        camera.position.set(dist * 0.6, dist * 0.5, dist);
+        controls.target.set(0, 0, 0);
+        controls.update();
+
+        hideLoading();
+      },
+      (xhr) => {
+        if (xhr.total) {
+          const pct = Math.round((xhr.loaded / xhr.total) * 100);
+          showLoading(`Loading model… ${pct}%`);
+        }
+      },
+      (err) => {
+        hideLoading();
+        showError3D('Failed to load 3D model. The file may be missing.');
+        console.error('[3D] Load error:', err);
+      }
+    );
+  }
+
+  function patchImageLoader() {
+    const original = THREE.ImageLoader.prototype.load;
+    THREE.ImageLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+      return original.call(this, url, onLoad, onProgress, function (err) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 2; canvas.height = 2;
+        const ctx = canvas.getContext('2d');
+        if (ctx) { ctx.fillStyle = '#cfcfcf'; ctx.fillRect(0, 0, 2, 2); }
+        if (typeof onLoad === 'function') onLoad(canvas);
+      });
+    };
+  }
+
+  /* ─ Edge lines ─ */
+  function addEdgeLines(obj) {
+    const toAdd = [];
+    obj.traverse(child => {
+      if (child.isMesh) {
+        const edges = new THREE.EdgesGeometry(child.geometry, 25);
+        const line  = new THREE.LineSegments(
+          edges,
+          new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.45, transparent: true })
+        );
+        line.name = '__edge__';
+        line.renderOrder = 1;
+        toAdd.push({ parent: child, line });
+      }
+    });
+    toAdd.forEach(({ parent, line }) => parent.add(line));
+  }
+
+  function toggleEdges() {
+    edgesVisible = !edgesVisible;
+    if (!currentModel) return;
+    currentModel.traverse(c => {
+      if (c.isLineSegments && c.name === '__edge__') c.visible = edgesVisible;
+    });
+    setActive('btn-edges', edgesVisible);
+    updateBtnText('btn-edges', edgesVisible ? 'Edges: On' : 'Edges: Off');
+  }
+
+  function toggleWireframe() {
+    wireframeVisible = !wireframeVisible;
+    if (!currentModel) return;
+    currentModel.traverse(c => {
+      if (c.isMesh && c.material) {
+        const mats = Array.isArray(c.material) ? c.material : [c.material];
+        mats.forEach(m => { m.wireframe = wireframeVisible; });
+      }
+    });
+    setActive('btn-wire', wireframeVisible);
+    updateBtnText('btn-wire', wireframeVisible ? 'Wireframe: On' : 'Wireframe: Off');
+  }
+
+  /* ─ Camera ─ */
+  function resetCamera() {
+    if (!currentModel) return;
+    const box  = new THREE.Box3().setFromObject(currentModel);
+    const size = box.getSize(new THREE.Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const dist = maxDim * 1.6;
+    startCameraTween(
+      new THREE.Vector3(dist * 0.6, dist * 0.5, dist),
+      new THREE.Vector3(0, 0, 0),
+      600
+    );
+  }
+
+  function focusSelection() {
+    if (!selectedParts.length) { showToast('Select a part first'); return; }
+    const box = new THREE.Box3();
+    selectedParts.forEach(p => box.expandByObject(p));
+    const centre = box.getCenter(new THREE.Vector3());
+    const size   = box.getSize(new THREE.Vector3());
+    const dist   = Math.max(size.x, size.y, size.z) * 2.5;
+    startCameraTween(
+      new THREE.Vector3(centre.x + dist * 0.5, centre.y + dist * 0.3, centre.z + dist),
+      centre,
+      500
+    );
+  }
+
+  function isolateSelection() {
+    if (!selectedParts.length) { showToast('Select a part first'); return; }
+    if (!currentModel) return;
+    currentModel.traverse(c => {
+      if (c.isMesh) c.visible = selectedParts.includes(c) || c.name === '__edge__';
+    });
+    showToast('Part isolated');
+  }
+
+  function showAllParts() {
+    if (!currentModel) return;
+    currentModel.traverse(c => { if (c.isMesh || c.isLineSegments) c.visible = true; });
+    showToast('All parts visible');
+  }
+
+  /* ─ Auto rotate ─ */
+  function toggleAutoRotate() {
+    autoRotateEnabled = !autoRotateEnabled;
+    controls.autoRotate = autoRotateEnabled;
+    controls.autoRotateSpeed = 1.5;
+    setActive('btn-auto-rotate', autoRotateEnabled);
+    updateBtnText('btn-auto-rotate', autoRotateEnabled ? 'Auto Rotate: On' : 'Auto Rotate: Off');
+  }
+
+  /* ─ Parts panel ─ */
+  function buildPartsPanel(model) {
+    const container = document.getElementById('part-toggles');
+    container.innerHTML = '';
+    const names = new Set();
+    model.traverse(c => { if (c.isMesh && c.name) names.add(c.name); });
+    if (!names.size) return;
+    names.forEach(name => {
+      const row = document.createElement('div');
+      row.className = 'part-toggle';
+      const id = `pt_${name.replace(/\W/g, '_')}`;
+      row.innerHTML = `
+        <input type="checkbox" id="${id}" checked onchange="d3.togglePartByName('${name}', this.checked)" />
+        <label for="${id}">${name}</label>`;
+      container.appendChild(row);
+    });
+    document.getElementById('parts-panel').style.display = 'block';
+  }
+
+  function togglePartsPanel() {
+    const panel = document.getElementById('parts-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function togglePartByName(name, visible) {
+    if (!currentModel) return;
+    currentModel.traverse(c => {
+      if (c.isMesh && c.name === name) c.visible = visible;
+    });
+  }
+
+  /* ─ Click / selection ─ */
+  function onCanvasClick(e) {
+    if (!currentModel) return;
+    const wrapper = document.getElementById('canvas-wrapper');
+    const rect = wrapper.getBoundingClientRect();
+    pointer.x = ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+    pointer.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    const hits = raycaster.intersectObjects(currentModel.children, true)
+      .filter(h => h.object.isMesh && h.object.name !== '__edge__');
+    if (!hits.length) { clearSelection(); return; }
+    const part = hits[0].object;
+    if (e.shiftKey) {
+      const idx = selectedParts.indexOf(part);
+      if (idx >= 0) selectedParts.splice(idx, 1); else selectedParts.push(part);
+    } else {
+      selectedParts = [part];
+    }
+    showToast(`Selected: ${part.name || 'Part'}`);
+  }
+
+  function clearSelection() { selectedParts = []; }
+
+  /* ─ Screenshot ─ */
+  function captureScreenshot() {
+    renderer.render(scene, camera);
+    const dataUrl = renderer.domElement.toDataURL('image/png');
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = `lsc-model-${Date.now()}.png`;
+    a.click();
+  }
+
+  /* ─ Camera tween ─ */
+  let tweenStart, tweenDur, tweenFromPos, tweenToPos, tweenFromTarget, tweenToTarget;
+
+  function startCameraTween(toPos, toTarget, dur) {
+    tweenFromPos    = camera.position.clone();
+    tweenToPos      = toPos;
+    tweenFromTarget = controls.target.clone();
+    tweenToTarget   = toTarget;
+    tweenDur        = dur;
+    tweenStart      = performance.now();
+    cameraTween     = true;
+  }
+
+  function updateCameraTween() {
+    const t = Math.min((performance.now() - tweenStart) / tweenDur, 1);
+    const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    camera.position.lerpVectors(tweenFromPos, tweenToPos, e);
+    controls.target.lerpVectors(tweenFromTarget, tweenToTarget, e);
+    controls.update();
+    if (t >= 1) cameraTween = null;
+  }
+
+  /* ─ Toast ─ */
+  function showToast(msg) {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => el.classList.add('fading'), 1800);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 2300);
+  }
+
+  /* ─ Helpers ─ */
+  function updateBtnText(id, txt) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = txt;
+  }
+  function setActive(id, on) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', on);
+  }
+
+  return {
+    init, onResize, loadModel,
+    toggleEdges, toggleWireframe,
+    resetCamera, focusSelection, isolateSelection, showAllParts,
+    toggleAutoRotate, captureScreenshot, togglePartsPanel,
+    togglePartByName,
+  };
+})();
+
+function showError3D(msg) {
+  const el = document.getElementById('error-3d');
+  el.style.display = 'block';
+  el.textContent = msg;
+}
+
+/* ===================================================
+   PDF VIEWER
+   =================================================== */
+const pdfViewer = (() => {
+  let pdfDoc   = null;
+  let pageNum  = 1;
+  let zoomLevel = 1;
+  let rendering = false;
+
+  function loadFile(url, name) {
+    document.getElementById('pdf-canvas').style.display = 'none';
+    document.getElementById('pdf-loading').style.display = 'flex';
+    document.getElementById('pdf-error').style.display = 'none';
+    document.getElementById('pdf-no-drawings').style.display = 'none';
+    document.getElementById('pdf-filename').textContent = name || '';
+    document.getElementById('pdf-page-info').textContent = 'Page — of —';
+    setNavEnabled(false);
+
+    if (typeof pdfjsLib === 'undefined') {
+      document.getElementById('pdf-loading').style.display = 'none';
+      document.getElementById('pdf-error').style.display = 'flex';
+      return;
+    }
+
+    pdfjsLib.getDocument(url).promise.then(doc => {
+      pdfDoc = doc;
+      pageNum = 1;
+      document.getElementById('pdf-loading').style.display = 'none';
+      document.getElementById('pdf-canvas').style.display = 'block';
+      updatePageInfo();
+      renderPage(pageNum);
+    }).catch(err => {
+      console.error('[PDF] Load error:', err);
+      document.getElementById('pdf-loading').style.display = 'none';
+      document.getElementById('pdf-error').style.display = 'flex';
+    });
+  }
+
+  function showNoDrawings() {
+    document.getElementById('pdf-loading').style.display = 'none';
+    document.getElementById('pdf-no-drawings').style.display = 'flex';
+    document.getElementById('pdf-canvas').style.display = 'none';
+  }
+
+  function renderPage(num) {
+    if (!pdfDoc || rendering) return;
+    rendering = true;
+    pdfDoc.getPage(num).then(page => {
+      const canvas  = document.getElementById('pdf-canvas');
+      const ctx     = canvas.getContext('2d');
+      const vp      = page.getViewport({ scale: zoomLevel * (window.devicePixelRatio || 1) });
+      canvas.width  = vp.width;
+      canvas.height = vp.height;
+      canvas.style.width  = `${vp.width  / (window.devicePixelRatio || 1)}px`;
+      canvas.style.height = `${vp.height / (window.devicePixelRatio || 1)}px`;
+      page.render({ canvasContext: ctx, viewport: vp }).promise.then(() => {
+        rendering = false;
+        updatePageInfo();
+      });
+    });
+  }
+
+  function updatePageInfo() {
+    if (!pdfDoc) return;
+    document.getElementById('pdf-page-info').textContent = `Page ${pageNum} of ${pdfDoc.numPages}`;
+    setNavEnabled(true);
+    document.getElementById('pdf-prev').disabled = pageNum <= 1;
+    document.getElementById('pdf-next').disabled = pageNum >= pdfDoc.numPages;
+  }
+
+  function setNavEnabled(on) {
+    document.getElementById('pdf-prev').disabled = !on;
+    document.getElementById('pdf-next').disabled = !on;
+  }
+
+  function prevPage() {
+    if (!pdfDoc || pageNum <= 1) return;
+    pageNum--;
+    renderPage(pageNum);
+  }
+
+  function nextPage() {
+    if (!pdfDoc || pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    renderPage(pageNum);
+  }
+
+  function setZoom(val) {
+    zoomLevel = parseFloat(val) || 1;
+    if (pdfDoc) renderPage(pageNum);
+  }
+
+  return { loadFile, prevPage, nextPage, setZoom, showNoDrawings };
+})();
+
+/* ===================================================
+   INIT
+   =================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  d3.init();
+  loadProjectData();
+});
+
+window.addEventListener('resize', () => {
+  d3.onResize();
+});
+</script>
+</body>
+</html>

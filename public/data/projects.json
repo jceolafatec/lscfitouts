@@ -1,0 +1,26 @@
+{
+  "demo": {
+    "name": "Campervan Bed Installation",
+    "client": "Demo Client",
+    "address": "Melbourne VIC",
+    "date": "January 2025",
+    "status": "Active",
+    "notes": "Full custom campervan bed fitout with integrated storage and fold-down mechanism.",
+    "models": [
+      { "name": "Campervan Bed Model", "url": "assets/models/Campervan-bed/model.glb" }
+    ],
+    "drawings": []
+  },
+  "project123": {
+    "name": "Shopfitting – JB Hi-Fi",
+    "client": "JB Hi-Fi",
+    "address": "Sydney NSW",
+    "date": "March 2025",
+    "status": "In Progress",
+    "notes": "Full shopfitting package including custom joinery, display units, and feature walls.",
+    "models": [
+      { "name": "Main Model", "url": "assets/models/Campervan-bed/model.glb" }
+    ],
+    "drawings": []
+  }
+}
