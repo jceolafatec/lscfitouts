@@ -1,0 +1,7 @@
+<projectMeta version="1" clientSlug="Campervan-bed" jobSlug="glb">
+  <clientName>JCeola</clientName>
+  <jobName>Campervan Bed</jobName>
+  <drawings>
+    <drawing slug="model" name="Model" />
+  </drawings>
+</projectMeta>

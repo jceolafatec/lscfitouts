@@ -1,0 +1,19 @@
+{
+  "project123": {
+    "name": "Shopfitting - JB Hi-Fi",
+    "client": "JB Hi-Fi",
+    "address": "Sydney NSW",
+    "status": "In Progress",
+    "projectFolder": "Campervan-bed",
+    "models": [
+      { "name": "Main Model", "url": "glb/model.glb" }
+    ],
+    "drawings": [
+      {
+        "name": "Plan Set",
+        "url": "pdf/jbhi-fi.pdf",
+        "revision": "B"
+      }
+    ]
+  }
+}

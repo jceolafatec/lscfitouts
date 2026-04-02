@@ -248,7 +248,7 @@
 
     <!-- Bottom controls bar -->
     <div id="controls-bar">
-        <button class="ctrl-btn" id="btn-edges" onclick="toggleEdges()">Edges: Off</button>
+        <button class="ctrl-btn active" id="btn-edges" onclick="toggleEdges()">Edges: On</button>
         <button class="ctrl-btn" id="btn-wire" onclick="toggleWireframe()">Wireframe: Off</button>
         <button class="ctrl-btn" onclick="resetCamera()">Reset View</button>
         <button class="ctrl-btn" id="btn-focus" onclick="focusSelection()">Focus Part</button>
@@ -259,10 +259,8 @@
         <button class="ctrl-btn" id="btn-measure-snap" onclick="toggleMeasureVertexSnap()">Snap Points: Off</button>
         <button class="ctrl-btn" id="btn-measure-clear" onclick="clearMeasurements()">Clear Measure</button>
         <button class="ctrl-btn" id="btn-comment-mode" onclick="toggleCommentMode()">Comment Mode: Off</button>
-        <button class="ctrl-btn" id="btn-comment-visibility" onclick="toggleCommentsVisibility()">Comments: Hide</button>
-        <button class="ctrl-btn" id="btn-comment-edit" onclick="editSelectedComment()">Edit Comment</button>
-        <button class="ctrl-btn" id="btn-comment-delete" onclick="deleteSelectedComment()">Delete Comment</button>
         <button class="ctrl-btn" id="btn-comment-clear" onclick="clearComments(true)">Clear Comments</button>
+        <button class="ctrl-btn" onclick="window.location.href = `viewer.html${window.location.search || ''}`">Back To Original</button>
         <label id="explode-distance-control" class="ctrl-slider-wrap is-hidden" for="explode-distance-slider">
             Gap
             <input
@@ -287,19 +285,13 @@
     <!-- Overlays -->
     <div id="loading">Loading 3D model&#8230;</div>
     <div id="error"></div>
-    <p id="orbit-hint">Click select &nbsp;·&nbsp; Drag gizmo to move part &nbsp;·&nbsp; Use Comment Mode to add notes &nbsp;·&nbsp; Hide/Show comments anytime</p>
+    <p id="orbit-hint">Comment flow: add notes in this page, then click Back To Original for the clean viewer.</p>
 
     <!-- Three.js r128 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/TransformControls.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
-
-    <script>
-        window.COMMENTS_API_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-            ? ''
-            : 'https://lscfitouts-comments-api.vercel.app/api/comments';
-    </script>
 
     <!-- Portfolio viewer logic (with edge-line support) -->
     <script src="assets/js/viewer.js"></script>

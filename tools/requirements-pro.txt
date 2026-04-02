@@ -15,3 +15,7 @@
 
 # Optional: Pillow if you want to add image processing later
 # pillow>=9.0
+
+# Optional: watchdog for instant folder/file change detection in
+# sync_portfolio_assets.py watch mode.
+# watchdog>=4.0

@@ -3,7 +3,14 @@
 
 Usage:
   python tools/sync_portfolio_assets.py         # one-time sync
-  python tools/sync_portfolio_assets.py --watch # continuous watch mode
+    python tools/sync_portfolio_assets.py --watch # continuous watch mode
+
+Optional dependency:
+    pip install watchdog
+
+When watchdog is installed, watch mode can use filesystem events for near
+instant detection of new files/folders under the projects directory.
+Without watchdog, it falls back to the built-in polling watcher.
 """
 
 from __future__ import annotations
@@ -11,19 +18,30 @@ from __future__ import annotations
 import argparse
 import json
 import time
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
+
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+except ImportError:  # pragma: no cover - optional dependency
+    FileSystemEventHandler = None
+    Observer = None
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 PROJECTS_JSON = ROOT_DIR / "assets" / "data" / "projects.json"
 MODELS_DIR = ROOT_DIR / "assets" / "models"
 CONTENT_DIR = ROOT_DIR / "assets" / "content"
+PROJECTS_DIR = ROOT_DIR / "projects"
 
 MODEL_EXTS = {".glb", ".gltf", ".obj", ".fbx"}
 IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp"}
+PDF_EXTS = {".pdf"}
 AUTO_SOURCES = {"auto-model", "auto-content"}
-WATCHABLE_EXTS = MODEL_EXTS | IMAGE_EXTS
+WATCHABLE_EXTS = MODEL_EXTS | IMAGE_EXTS | PDF_EXTS
+WATCH_ROOTS = [PROJECTS_DIR]
 
 
 def to_posix_relative(path: Path) -> str:
@@ -235,7 +253,7 @@ def snapshot_state() -> Dict[str, Tuple[int, int]]:
     are unchanged.
     """
     state: Dict[str, Tuple[int, int]] = {}
-    watched_roots = [MODELS_DIR, CONTENT_DIR]
+    watched_roots = WATCH_ROOTS
 
     for base in watched_roots:
         root_key = to_posix_relative(base) if base.exists() else str(base)
@@ -281,8 +299,82 @@ def watch(interval: float, force_sync_seconds: float) -> None:
             last_sync = time.monotonic()
 
 
+def _is_relevant_change(path: str, is_directory: bool) -> bool:
+    path_obj = Path(path)
+
+    # Directory create/move/delete events are important to catch new folders.
+    if is_directory:
+        return True
+
+    return path_obj.suffix.lower() in WATCHABLE_EXTS
+
+
+def watch_with_watchdog(interval: float, force_sync_seconds: float) -> None:
+    if Observer is None or FileSystemEventHandler is None:
+        raise RuntimeError("watchdog package is not installed")
+
+    watched_roots = WATCH_ROOTS
+    for root in watched_roots:
+        root.mkdir(parents=True, exist_ok=True)
+
+    print(
+        "Watching with watchdog filesystem events "
+        f"(forced sync every {force_sync_seconds:.1f}s)..."
+    )
+
+    class SyncEventHandler(FileSystemEventHandler):
+        def __init__(self) -> None:
+            super().__init__()
+            self._dirty_event = threading.Event()
+
+        @property
+        def dirty(self) -> bool:
+            return self._dirty_event.is_set()
+
+        def clear(self) -> None:
+            self._dirty_event.clear()
+
+        def mark_if_relevant(self, src_path: str, is_directory: bool) -> None:
+            if _is_relevant_change(src_path, is_directory):
+                self._dirty_event.set()
+
+        def on_created(self, event):  # type: ignore[override]
+            self.mark_if_relevant(event.src_path, event.is_directory)
+
+        def on_deleted(self, event):  # type: ignore[override]
+            self.mark_if_relevant(event.src_path, event.is_directory)
+
+        def on_modified(self, event):  # type: ignore[override]
+            self.mark_if_relevant(event.src_path, event.is_directory)
+
+        def on_moved(self, event):  # type: ignore[override]
+            self.mark_if_relevant(event.src_path, event.is_directory)
+            self.mark_if_relevant(event.dest_path, event.is_directory)
+
+    handler = SyncEventHandler()
+    observer = Observer()
+    for root in watched_roots:
+        observer.schedule(handler, str(root), recursive=True)
+
+    sync_once(verbose=True)
+    last_sync = time.monotonic()
+    observer.start()
+
+    try:
+        while True:
+            time.sleep(max(interval, 0.5))
+            timed_force = (time.monotonic() - last_sync) >= force_sync_seconds
+            if handler.dirty or timed_force:
+                handler.clear()
+                sync_once(verbose=True)
+                last_sync = time.monotonic()
+    finally:
+        observer.stop()
+        observer.join(timeout=5.0)
+
+
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Sync portfolio projects from assets folders")
+    parser = argparse.ArgumentParser(description="Sync portfolio projects and watch ./projects for uploads")
     parser.add_argument("--watch", action="store_true", help="Keep watching and resync on changes")
     parser.add_argument("--interval", type=float, default=5.0, help="Polling interval in seconds for watch mode")
     parser.add_argument(
@@ -291,13 +383,35 @@ def parse_args() -> argparse.Namespace:
         default=60.0,
         help="Forced resync interval in seconds while watching",
     )
+    parser.add_argument(
+        "--watch-mode",
+        choices=["auto", "watchdog", "polling"],
+        default="auto",
+        help="Watch strategy: auto uses watchdog if available, else polling",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
     if args.watch:
-        watch(max(args.interval, 1.0), max(args.force_sync_seconds, 5.0))
+        interval = max(args.interval, 1.0)
+        force_sync_seconds = max(args.force_sync_seconds, 5.0)
+
+        if args.watch_mode == "polling":
+            watch(interval, force_sync_seconds)
+            return
+
+        if args.watch_mode == "watchdog":
+            watch_with_watchdog(interval, force_sync_seconds)
+            return
+
+        # auto mode
+        if Observer is None or FileSystemEventHandler is None:
+            print("watchdog not installed, falling back to polling mode.")
+            watch(interval, force_sync_seconds)
+        else:
+            watch_with_watchdog(interval, force_sync_seconds)
     else:
         sync_once(verbose=True)
 
