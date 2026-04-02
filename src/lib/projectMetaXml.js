@@ -10,7 +10,14 @@ function escapeXml(value) {
 }
 
 function getMetaApiBaseUrl() {
-  return (import.meta.env.VITE_PROJECT_META_API_URL || '').trim() || '/api/project-meta'
+  const configured = (import.meta.env.VITE_PROJECT_META_API_URL || '').trim()
+  if (configured) return configured
+
+  if (typeof window !== 'undefined' && /github\.io$/i.test(window.location.hostname)) {
+    return 'https://lscfitouts-comments-api.vercel.app/api/project-meta'
+  }
+
+  return '/api/project-meta'
 }
 
 function buildMetaUrl(clientSlug, jobSlug) {

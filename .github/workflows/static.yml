@@ -37,6 +37,7 @@ jobs:
       - name: Build
         env:
           VITE_BASE_URL: /lscfitouts/
+          VITE_PROJECT_META_API_URL: https://lscfitouts-comments-api.vercel.app/api/project-meta
         run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

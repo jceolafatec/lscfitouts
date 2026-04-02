@@ -101,3 +101,20 @@ Google Drive note:
 
 - File links are normalized to direct-download format when possible.
 - Folder-share links (`/drive/folders/...`) are not a file endpoint and cannot be used directly as a project folder index.
+
+## Recommended Storage Split
+
+Use this split for reliability:
+
+- 3D/PDF files: external storage (Google Drive direct-file links or CDN)
+- XML metadata (`project-meta.xml`): Vercel API + Vercel Blob
+
+Why keep XML in Vercel instead of Drive:
+
+- Browser writes to Drive require OAuth and token refresh flows.
+- Drive sharing and CORS behavior is less predictable for app writes.
+- Vercel API already supports create/update/delete metadata in one place.
+
+Current production default:
+
+- GitHub Pages builds point metadata to `https://lscfitouts-comments-api.vercel.app/api/project-meta`.
