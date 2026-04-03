@@ -16,8 +16,11 @@ export function ClientPage() {
   const [activeClient, setActiveClient] = useState('')
   const [activeJob, setActiveJob] = useState('')
   const [apiOverrides, setApiOverrides] = useState({})
+  const [allClients, setAllClients] = useState([])
 
-  const allClients = useMemo(() => loadClientDrawingTree(), [])
+  useEffect(() => {
+    loadClientDrawingTree().then(setAllClients).catch(() => setAllClients([]))
+  }, [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)

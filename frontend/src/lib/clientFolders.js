@@ -1,5 +1,3 @@
-import { withBasePath } from './pathing'
-
 function titleFromSlug(value) {
   if (!value) return 'Untitled'
   return value
@@ -19,6 +17,12 @@ function getFileExt(filePath) {
   return match ? match[1].toLowerCase() : ''
 }
 
+/**
+ * Derive a drawing slug from the sub-path inside a job folder.
+ * e.g. "glb/J01/model.glb" → "J01"
+ *      "pdf/J03/sheet.pdf" → "J03"
+ *      "preview.png"       → "preview"
+ */
 function getDrawingSlug(subPath) {
   const parts = subPath.split('/').filter(Boolean)
   if (parts.length >= 3 && ['glb', 'pdf'].includes(parts[0].toLowerCase())) {
@@ -30,16 +34,28 @@ function getDrawingSlug(subPath) {
   return getFileStem(subPath)
 }
 
+/**
+ * Given a full URL like "/projects/byproxy/knobby-pacificfair/glb/J01/model.glb"
+ * extract clientSlug, jobSlug, and the sub-path relative to the job folder.
+ */
+function parseProjectUrl(url) {
+  const match = url.match(/^\/projects\/([^/]+)\/([^/]+)\/(.+)$/)
+  if (!match) return null
+  return {
+    clientSlug: decodeURIComponent(match[1]),
+    jobSlug: decodeURIComponent(match[2]),
+    subPath: match[3],
+  }
+}
+
 function ensureEntry(index, clientSlug, jobSlug, drawingSlug) {
   if (!index.has(clientSlug)) {
     index.set(clientSlug, new Map())
   }
-
   const jobMap = index.get(clientSlug)
   if (!jobMap.has(jobSlug)) {
     jobMap.set(jobSlug, new Map())
   }
-
   const drawingMap = jobMap.get(jobSlug)
   if (!drawingMap.has(drawingSlug)) {
     drawingMap.set(drawingSlug, {
@@ -52,42 +68,47 @@ function ensureEntry(index, clientSlug, jobSlug, drawingSlug) {
       imageFiles: [],
     })
   }
-
   return drawingMap.get(drawingSlug)
 }
 
-function collectAssets() {
-  const fileMap = import.meta.glob('/projects/*/*/**/*.{glb,gltf,GLB,GLTF,pdf,PDF,png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', {
-    eager: true,
-    import: 'default',
-    query: '?url',
-  })
+/**
+ * Fetch the project list from the Express backend and build the
+ * client → job → drawing hierarchy used by the dashboard and client pages.
+ */
+export async function loadClientDrawingTree() {
+  const response = await fetch('/api/projects')
+  if (!response.ok) throw new Error('fetch-failed')
+  const data = await response.json()
 
   const hierarchy = new Map()
 
-  for (const [assetPath, assetUrl] of Object.entries(fileMap)) {
-    const match = assetPath.match(/^\/projects\/([^/]+)\/([^/]+)\/(.+)$/)
-    if (!match) continue
+  for (const entry of Object.values(data)) {
+    const allFiles = [
+      ...entry.modelFiles,
+      ...entry.drawingFiles,
+      ...entry.previewFiles,
+    ]
 
-    const clientSlug = decodeURIComponent(match[1])
-    const jobSlug = decodeURIComponent(match[2])
-    const subPath = match[3]
-    const drawingSlug = getDrawingSlug(subPath)
-    const entry = ensureEntry(hierarchy, clientSlug, jobSlug, drawingSlug)
+    for (const url of allFiles) {
+      const parsed = parseProjectUrl(url)
+      if (!parsed) continue
 
-    const resolvedUrl = typeof assetUrl === 'string' ? assetUrl : withBasePath(assetPath)
-    const ext = getFileExt(subPath)
+      const { clientSlug, jobSlug, subPath } = parsed
+      const drawingSlug = getDrawingSlug(subPath)
+      const drawingEntry = ensureEntry(hierarchy, clientSlug, jobSlug, drawingSlug)
 
-    if (ext === 'glb' || ext === 'gltf') {
-      entry.modelFiles.push(resolvedUrl)
-    } else if (ext === 'pdf') {
-      entry.drawingFiles.push(resolvedUrl)
-    } else if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
-      entry.imageFiles.push(resolvedUrl)
+      const ext = getFileExt(subPath)
+      if (ext === 'glb' || ext === 'gltf') {
+        drawingEntry.modelFiles.push(url)
+      } else if (ext === 'pdf') {
+        drawingEntry.drawingFiles.push(url)
+      } else if (['png', 'jpg', 'jpeg', 'webp'].includes(ext)) {
+        drawingEntry.imageFiles.push(url)
+      }
     }
   }
 
-  const clients = Array.from(hierarchy.entries())
+  return Array.from(hierarchy.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([clientSlug, jobMap]) => {
       const jobs = Array.from(jobMap.entries())
@@ -123,10 +144,4 @@ function collectAssets() {
         jobs,
       }
     })
-
-  return clients
-}
-
-export function loadClientDrawingTree() {
-  return collectAssets()
 }

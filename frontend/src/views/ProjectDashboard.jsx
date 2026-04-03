@@ -11,8 +11,6 @@ import { normalizeExternalAssetUrl } from '../lib/externalAssets'
 const INVALID_LINK_MESSAGE = 'This project link is invalid or expired. Please contact LSC Fitouts.'
 const LazyThreeDViewer = lazy(() => import('../components/ThreeDViewer').then((module) => ({ default: module.ThreeDViewer })))
 const LazyPdfViewer = lazy(() => import('../components/PdfViewer').then((module) => ({ default: module.PdfViewer })))
-const folderStatuses = loadProjectFolderStatuses()
-const clientTree = loadClientDrawingTree()
 const DASHBOARD_LABEL_OVERRIDES_KEY = 'dashboard-label-overrides-v1'
 
 function buildStandaloneViewerUrl(modelUrl) {
@@ -61,7 +59,10 @@ export function ProjectDashboard() {
   const [draftEdits, setDraftEdits] = useState({})
   const [editingJobs, setEditingJobs] = useState({})
   const [metaPresence, setMetaPresence] = useState({})
+  const [folderStatuses, setFolderStatuses] = useState([])
+  const [clientTree, setClientTree] = useState([])
 
+  // Load project from URL on mount
   useEffect(() => {
     async function bootstrap() {
       const params = new URLSearchParams(window.location.search)
@@ -89,6 +90,12 @@ export function ProjectDashboard() {
     }
 
     bootstrap()
+  }, [])
+
+  // Load folder statuses and client tree from backend API
+  useEffect(() => {
+    loadProjectFolderStatuses().then(setFolderStatuses).catch(() => setFolderStatuses([]))
+    loadClientDrawingTree().then(setClientTree).catch(() => setClientTree([]))
   }, [])
 
   useEffect(() => {
@@ -166,7 +173,7 @@ export function ProjectDashboard() {
     return () => {
       alive = false
     }
-  }, [])
+  }, [clientTree])
 
   const resolvedModelUrl = withBasePath(resolveProjectAssetPath(projectId, project, project?.models?.[0]?.url || ''))
   const resolvedDrawingUrl = withBasePath(resolveProjectAssetPath(projectId, project, project?.drawings?.[0]?.url || ''))

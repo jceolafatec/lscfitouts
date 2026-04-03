@@ -1,9 +1,21 @@
-.vercel
-.env*.local
-.env*
-!.env.example
+# Build outputs
+frontend/dist/
+frontend/node_modules/
+backend/node_modules/
 node_modules/
 dist/
 .vite/
+
+# Environment secrets
+.env*.local
+.env*
+!.env.example
+
+# Vercel (no longer used)
+.vercel
+
+# macOS
 .DS_Store
 ._*
+Icon?
+

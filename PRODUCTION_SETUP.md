@@ -1,37 +1,31 @@
-# Production Setup: Vercel Blob Storage + GitHub Pages
+# Production Setup: Local Backend + GitHub Pages
 
-This is the complete setup for production deployment combining GitHub Pages (frontend) with Vercel Blob Storage (comments backend).
+This is the complete setup for production deployment combining GitHub Pages (frontend) with a local backend (comments storage).
 
 ## Quick Start (5 minutes)
 
-### 1. Deploy to Vercel
+### 1. Start Backend Server
 ```bash
-npm install -g vercel
-vercel login
-vercel
+cd backend
+npm install
+node server.js
 ```
-- Select your GitHub repo
-- Note your deployment URL: `https://your-app.vercel.app`
-- Wait for auto-build to complete
+Server runs on `http://localhost:3000/api/comments`
 
-### 2. Enable Blob Storage
-- Open Vercel Dashboard → Your Project → Storage
-- Click "Create" → Blob
-- Copy-paste deployment URL into `.env.local`:
-
+### 2. Configure Frontend API URL
+Update `.env.local`:
 ```env
-# .env.local
-VITE_COMMENTS_API_URL=https://your-app.vercel.app/api/comments
+VITE_COMMENTS_API_URL=http://localhost:3000/api/comments
 ```
 
-### 3. Rebuild and Deploy to GitHub Pages
+### 3. Build and Deploy to GitHub Pages
 ```bash
 npm run build
 npm run deploy
 ```
 
 ### 4. Test
-- Open your GitHub Pages URL
+- Open your GitHub Pages URL or local dev server
 - Load a 3D model
 - Add a comment
 - Refresh → comment persists ✓
@@ -40,47 +34,44 @@ npm run deploy
 
 | File | Purpose |
 |------|---------|
-| `api/comments.js` | Vercel serverless function (handles GET/PUT/DELETE) |
-| `.env.local` | Environment config (points to Vercel API) |
-| `vercel.json` | Vercel deployment config |
-| `package.json` | Added `@vercel/blob` dependency |
-| `assets/js/viewer.js` | Updated API functions to use env-based endpoint |
+| `backend/server.js` | Express backend (handles GET/PUT/DELETE) |
+| `backend/routes/comments.js` | API endpoints |
+| `.env.local` | Environment config (points to backend) |
 | `DEPLOYMENT.md` | Full deployment guide with troubleshooting |
 
 ## How It Works
 
 **Development:**
 ```
-npm run dev → Vite middleware → projects/*/comments.xml
+npm run dev → Backend API → projects/*/comments.xml
 ```
 
 **Production:**
 ```
-GitHub Pages → Vercel API → Vercel Blob Storage
+GitHub Pages → Backend API → projects/*/comments.xml (stored on backend server)
 ```
 
-Same XML format, same code, different backend!
+Same XML format, same code, backend stores files!
 
 ## Key Features
 
-✅ **No database setup** — Uses Vercel Blob Storage (managed)  
-✅ **Free tier** — 1 GB storage included  
+✅ **Simple setup** — No third-party services required  
+✅ **Full control** — Comments stored on your own server  
 ✅ **One API** — Same endpoints work locally and production  
-✅ **Instant deploy** — Push to GitHub → Vercel auto-deploys  
+✅ **Persistent storage** — XML files saved in projects folder  
 ✅ **Fallback** — Uses localStorage if API unavailable  
 
 ## Environment Variables
 
 | Name | Where | Default | Notes |
 |------|-------|---------|-------|
-| `VITE_COMMENTS_API_URL` | `.env.local` | (empty = use local) | Set to Vercel URL for production |
-| `BLOB_READ_WRITE_TOKEN` | Vercel Project Settings | (auto-generated) | Do not commit this |
+| `VITE_COMMENTS_API_URL` | `.env.local` | (empty = use local) | Set to backend URL |
 
 ## Verify Setup
 
 ```bash
 # Test API directly
-curl "https://your-app.vercel.app/api/comments?modelPath=projects/Campervan-bed/glb/model.glb&project=Campervan-bed"
+curl "http://localhost:3000/api/comments?modelPath=projects/Campervan-bed/glb/model.glb&project=Campervan-bed"
 
 # Should return: 404 (empty) or XML (existing comments)
 ```
@@ -89,18 +80,17 @@ curl "https://your-app.vercel.app/api/comments?modelPath=projects/Campervan-bed/
 
 See `DEPLOYMENT.md` for:
 - Detailed step-by-step guide
-- Troubleshooting (comments not saving, env issues)
+- Troubleshooting (comments not saving, backend issues)
 - API reference with examples
-- Local testing of production endpoint
 
-## Next: What's Running Where
+## What's Running Where
 
 | Component | Location | Storage |
 |-----------|----------|---------|
 | Frontend (viewer.html, viewer.js) | GitHub Pages static | CDN |
 | 3D models (*.glb) | GitHub Pages static | CDN |
-| Comments (*.xml) | Vercel Blob Storage | Blob API |
-| API logic | Vercel Functions | /api/comments.js |
+| Comments (*.xml) | Backend file system | Local storage |
+| API logic | Backend Express server | backend/routes/comments.js |
 
-Comments are now **globally accessible** and **persist permanently** on Vercel's infrastructure! 🚀
+Comments are stored on your backend server with full control and persistence!
 
