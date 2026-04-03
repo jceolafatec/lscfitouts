@@ -10,8 +10,8 @@ export const HeaderBar = memo(function HeaderBar() {
           src={logoSrc}
           alt="LSC Fitouts"
           className="header-logo"
-          width="148"
-          height="148"
+          width="56"
+          height="56"
           onError={(event) => {
             event.currentTarget.onerror = null
             event.currentTarget.src = 'assets/logo.png'
