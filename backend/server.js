@@ -39,7 +39,16 @@ app.get('/api/health', (req, res) => {
 app.use('/projects', express.static(PROJECTS_ROOT, { dotfiles: 'ignore' }))
 
 // Serve the built React frontend
-app.use(express.static(FRONTEND_ROOT))
+// HTML must never be cached (SPA routing), assets are content-hashed so can be cached forever.
+app.use(express.static(FRONTEND_ROOT, {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.set('Cache-Control', 'no-store')
+    } else {
+      res.set('Cache-Control', 'public, max-age=31536000, immutable')
+    }
+  },
+}))
 
 // SPA fallback: return index.html for all non-API, non-asset routes
 app.get('*', (req, res) => {

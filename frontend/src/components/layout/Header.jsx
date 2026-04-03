@@ -12,10 +12,8 @@ export const Header = memo(function Header({ project, title, subtitle, statusLab
           className="header-logo"
           width="148"
           height="37"
-          onError={(event) => {
-            event.currentTarget.onerror = null
-            event.currentTarget.src = 'assets/logo.png'
-          }}
+          fetchpriority="high"
+          decoding="async"
         />
       </div>
 

@@ -280,7 +280,7 @@ export function ProjectDashboard() {
   }, [apiOverrides, labelOverrides, normalizedSearchTerm])
   const headerTitle = status === 'catalog' ? 'Dashboard' : undefined
   const headerSubtitle = status === 'catalog' ? 'All jobs discovered under ./projects/<client>/<job>' : undefined
-  const headerStatus = status === 'catalog' ? `${folderStatuses.length} Projects` : undefined
+  const headerStatus = status === 'catalog' ? 'LSC Fitouts' : undefined
   const catalogStats = {
     total: folderStatuses.length,
     withModel: folderStatuses.filter((entry) => entry.hasModel).length,
