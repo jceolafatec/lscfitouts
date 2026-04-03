@@ -162,7 +162,7 @@ export function ClientPage() {
             className="client-logo"
             onError={(event) => {
               event.currentTarget.onerror = null
-              event.currentTarget.src = 'assets/logo.png'
+              event.currentTarget.src = logoSrc
             }}
           />
           <p className="client-kicker">LSC Fitouts</p>
